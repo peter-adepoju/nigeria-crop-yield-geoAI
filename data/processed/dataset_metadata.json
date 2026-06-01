@@ -1,0 +1,9 @@
+{
+  "source_workbook": "data\\raw\\nbs\\nass_report_tables_2022_2023.xlsx",
+  "processed_file": "data\\processed\\nbs_crop_yield_state_zone_2022_2023.csv",
+  "n_rows": 1053,
+  "n_state_level_rows_with_yield": 490,
+  "n_crops": 22,
+  "n_states": 37,
+  "target": "yield_kg_ha"
+}

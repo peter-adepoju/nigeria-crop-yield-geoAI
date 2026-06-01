@@ -1,0 +1,17 @@
+name: nigeria-crop-yield-geoai
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - openpyxl
+  - pyyaml
+  - requests
+  - joblib
+  - pytest
+  - pip
+  - pip:
+      - rich

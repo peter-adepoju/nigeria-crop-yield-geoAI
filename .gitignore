@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+jax_env/
+
+# Data and models
+models/*.joblib
+models/*.pkl
+reports/figures/*.png
+reports/tables/*.csv
+reports/*.html
+*.log
+*.err
+
+# Keep real included NBS XLSX but ignore heavy optional downloads
+/data/raw/sentinel2/*
+!/data/raw/sentinel2/.gitkeep
+/data/raw/climate/*
+!/data/raw/climate/.gitkeep
+/data/interim/*
+!/data/interim/.gitkeep
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,82 @@
+project:
+  name: crop-yield-nigeria-geoai
+  random_state: 42
+
+paths:
+  nbs_xlsx: data/raw/nbs/nass_report_tables_2022_2023.xlsx
+  nbs_processed: data/processed/nbs_crop_yield_state_zone_2022_2023.csv
+  state_metadata: data/processed/state_metadata.csv
+  climate_daily: data/raw/climate/nasa_power_daily_state_centroids_2022_2023.csv
+  sentinel_features: data/interim/sentinel2_monthly_indices_state_crop_2022_2023.csv
+  modeling_dataset: data/processed/modeling_dataset.csv
+  model_dir: models
+  report_dir: reports
+
+nbs:
+  download_url: https://microdata.nigerianstat.gov.ng/index.php/catalog/173/download/1303
+  source_name: National Agricultural Sample Survey 2022/2023 report tables
+  exclude_aggregate_rows: true
+  target: yield_kg_ha
+
+climate:
+  provider: nasa_power
+  start_date: "2022-01-01"
+  end_date: "2023-12-31"
+  parameters:
+    - PRECTOTCORR
+    - T2M
+    - T2M_MAX
+    - T2M_MIN
+    - RH2M
+    - WS2M
+
+sentinel2:
+  provider: microsoft_planetary_computer
+  collection: sentinel-2-l2a
+  start_date: "2022-01-01"
+  end_date: "2023-12-31"
+  max_cloud_cover: 30
+  monthly_composite: true
+  indices:
+    - ndvi
+    - evi
+    - ndwi
+    - savi
+
+modeling:
+  test_size: 0.25
+  split_strategy: group_by_state
+  target_transform: none
+  include_models:
+    - dummy_mean
+    - ridge
+    - random_forest
+    - extra_trees
+    - gradient_boosting
+    - mlp
+  leakage_columns:
+    - yield_kg_ha
+    - harvested_quantity_kg
+    - harvested_area_ha
+  categorical_features:
+    - crop
+    - season
+    - zone
+    - agroecological_zone
+  numeric_features:
+    - households_reporting_000
+    - planted_area_ha
+    - latitude
+    - longitude
+    - total_rainfall_mm
+    - mean_tmean_c
+    - mean_tmax_c
+    - mean_tmin_c
+    - mean_rh_percent
+    - growing_degree_days
+    - heat_stress_days
+    - ndvi_mean
+    - ndvi_std
+    - evi_mean
+    - ndwi_mean
+    - savi_mean

@@ -1,0 +1,59 @@
+{
+  "best_model": "random_forest",
+  "target": "yield_kg_ha",
+  "features": [
+    "households_reporting_000",
+    "planted_area_ha",
+    "latitude",
+    "longitude",
+    "total_rainfall_mm",
+    "mean_tmean_c",
+    "mean_tmax_c",
+    "mean_tmin_c",
+    "mean_rh_percent",
+    "growing_degree_days",
+    "heat_stress_days",
+    "crop",
+    "season",
+    "zone",
+    "agroecological_zone"
+  ],
+  "numeric_features": [
+    "households_reporting_000",
+    "planted_area_ha",
+    "latitude",
+    "longitude",
+    "total_rainfall_mm",
+    "mean_tmean_c",
+    "mean_tmax_c",
+    "mean_tmin_c",
+    "mean_rh_percent",
+    "growing_degree_days",
+    "heat_stress_days"
+  ],
+  "categorical_features": [
+    "crop",
+    "season",
+    "zone",
+    "agroecological_zone"
+  ],
+  "test_states": [
+    "Bauchi",
+    "Benue",
+    "Enugu",
+    "Imo",
+    "Jigawa",
+    "Lagos",
+    "Nasarawa",
+    "Niger",
+    "Osun",
+    "Yobe"
+  ],
+  "metrics": {
+    "model": "random_forest",
+    "rmse": 1433.5910879166283,
+    "mae": 808.711393219974,
+    "r2": 0.5351810336101213,
+    "mape_percent": 51.41365316192383
+  }
+}
