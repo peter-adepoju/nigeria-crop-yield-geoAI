@@ -538,90 +538,309 @@ if show_debug:
         st.write(modeling.columns.tolist())
 
 
-story_tabs = st.tabs(["Abstract", "Methods", "Results", "Figures", "Explorer"])
+story_tabs = st.tabs(
+    [
+        "Project Story",
+        "Background",
+        "Data",
+        "Feature Engineering",
+        "Modeling",
+        "Evaluation",
+        "Explainability",
+        "Figures",
+        "Explorer",
+        "Limitations",
+        "Future Work",
+    ]
+)
 
 with story_tabs[0]:
-    st.markdown("### Abstract")
-    left, right = st.columns([1.3, 1])
-    with left:
-        st.markdown(
-            """
-            This project predicts crop yield at the state x crop x season level in Nigeria
-            by joining NBS agricultural survey tables with geospatial and climate covariates.
-            The core value is not just the prediction itself, but the full pipeline: data audit,
-            feature construction, leakage control, model selection, and explainability.
-            """
-        )
-        st.markdown(
-            """
-            **Research question**: can state-level survey tables, climate summaries, and
-            satellite vegetation indices jointly explain yield variation across crops and zones?
-            """
-        )
-    with right:
-        st.metric("States covered", "37")
-        st.metric("Crops tracked", "22")
-        st.metric("State-level yield rows", "490")
-        st.metric("Total rows in processed table", "1,053")
+    st.markdown("### Project Story")
+    st.markdown(
+        """
+        This project is a GeoAI study of crop yield prediction across Nigerian states and
+        agroecological zones. The central idea is simple but important: yield is shaped by
+        geography, crop type, seasonality, climate, and vegetation condition, so any serious
+        forecasting model should reflect those forces rather than rely on a single aggregate
+        number.
+
+        The repository is organized like a full research pipeline. It begins with raw NBS
+        survey tables, adds state metadata, then enriches the table with climate and
+        Sentinel-2 summaries where available. After that, several regression models are
+        compared, the best model is tuned and explained, and the residuals are analyzed by
+        crop, state, season, and zone.
+
+        The website is intentionally paper-like. It tells the story in the same order a
+        researcher would write it: problem, background, data, methods, results, interpretation,
+        limitations, and future work. The goal is not merely to show output, but to help a
+        reader understand why the output matters.
+        """
+    )
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("States covered", "37")
+    c2.metric("Crops tracked", "22")
+    c3.metric("State-level yield rows", "490")
+    c4.metric("Total processed rows", "1,053")
+    st.info(
+        "The project uses state-level agricultural reporting, so it is best read as a high-quality "
+        "predictive and explanatory study rather than a plot-level operational system."
+    )
 
 with story_tabs[1]:
-    st.markdown("### Methods")
-    method_cols = st.columns(3)
-    method_cols[0].markdown(
+    st.markdown("### Background")
+    st.markdown(
         """
-        **1. Data audit**
+        Nigeria's agriculture is spatially diverse. Rainfall, heat, humidity, crop mix, and
+        seasonal timing vary across the country, which means that a national average hides a
+        great deal of local structure. That is why crop yield modeling is not just a machine
+        learning exercise: it is a spatial reasoning problem.
 
-        Validate the NBS workbook, standardize crop labels, and remove non-modelable
-        aggregate rows before training.
+        Machine learning is used here as a function-approximation tool. The model learns a
+        mapping from features such as crop, state, climate, and vegetation indices to the
+        continuous target yield in kg/ha. Because the target is numeric, this is a regression
+        problem rather than a classification problem.
+
+        Several background ideas are essential:
+        - supervised learning uses labeled examples,
+        - regression predicts continuous values,
+        - leakage occurs when target information enters the feature set,
+        - interpretability tells us what the model learned,
+        - geospatial context matters because location is not neutral.
         """
     )
-    method_cols[1].markdown(
-        """
-        **2. Feature engineering**
-
-        Join state metadata, climate summaries, and optional Sentinel-2 vegetation metrics
-        to create a modeling-ready table.
-        """
-    )
-    method_cols[2].markdown(
-        """
-        **3. Modeling**
-
-        Compare a baseline against tree-based regressors, then inspect residuals, crop
-        bias, and permutation importance.
-        """
-    )
-    st.info(
-        "Leakage control matters here: reported yield is not reconstructed from harvested area "
-        "or production, and aggregate rows are excluded from the training set."
+    st.warning(
+        "If you are new to ML, think of this project as learning from examples of state-crop-season "
+        "rows, then checking whether the learned pattern generalizes to new data and new regions."
     )
 
 with story_tabs[2]:
-    st.markdown("### Results snapshot")
-    if "model" in metrics.columns:
-        leader = metrics.iloc[0]
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Best model", str(leader["model"]))
-        c2.metric("RMSE", f'{leader.get("rmse", float("nan")):,.2f}')
-        c3.metric("MAE", f'{leader.get("mae", float("nan")):,.2f}')
-        c4.metric("R²", f'{leader.get("r2", float("nan")):.3f}')
-    st.dataframe(metrics, use_container_width=True)
+    st.markdown("### Data")
+    st.markdown(
+        """
+        The core source is the NBS National Agricultural Sample Survey 2022/2023 report tables.
+        These tables supply the target yield and the main agricultural context. The processed
+        table in the repo summarizes 1,053 rows, of which 490 are state-level rows with yield
+        values.
+
+        The data sources in the pipeline are:
+        1. NBS survey tables, which define the target and the row structure.
+        2. State metadata, which attaches centroid and zone information.
+        3. Climate data, either from NiMet or NASA POWER fallback summaries.
+        4. Sentinel-2 remote sensing, which supplies vegetation-condition features.
+
+        The project deliberately supports both a quickstart mode and a fuller geospatial mode.
+        That means the reader can reproduce the main project using only the included public data,
+        and then optionally extend it with richer climate and satellite inputs.
+        """
+    )
+    ds_cols = st.columns(3)
+    ds_cols[0].markdown(
+        """
+        **Included data**
+
+        - NBS workbook
+        - processed yield table
+        - state metadata
+        - modeling dataset
+        """
+    )
+    ds_cols[1].markdown(
+        """
+        **Optional data**
+
+        - NiMet station climate data
+        - NASA POWER fallback climate data
+        - Sentinel-2 extraction outputs
+        """
+    )
+    ds_cols[2].markdown(
+        """
+        **Important constraint**
+
+        Not all ideal data are open or lightweight. The project therefore keeps the
+        code flexible enough to degrade gracefully when only the public source tables
+        are available.
+        """
+    )
 
 with story_tabs[3]:
-    st.markdown("### Figure gallery")
+    st.markdown("### Feature Engineering")
+    st.markdown(
+        """
+        Feature engineering turns raw public tables into a modeling dataset. This is one of
+        the most important stages in the project because the model can only learn from the
+        variables it receives. The final table is designed to answer the question: what can
+        we safely know about a state-crop-season observation before we try to predict yield?
+
+        The feature set combines:
+        - survey variables such as crop and season,
+        - spatial variables such as state and zone,
+        - climate summaries such as rainfall and temperature,
+        - Sentinel-2 vegetation indices such as NDVI, EVI, NDWI, and SAVI.
+
+        The crucial design rule is leakage control. Variables that are algebraically or
+        operationally tied to yield, such as harvested area or production, are excluded from
+        the predictors because they would make the task unrealistically easy.
+        """
+    )
+    feat_cols = st.columns(2)
+    feat_cols[0].markdown(
+        """
+        **Remote sensing logic**
+
+        Sentinel-2 bands are not used raw in the dashboard. Instead, they are transformed
+        into vegetation indices because those summarize canopy vigor, moisture, and soil
+        background effects in a more interpretable way.
+        """
+    )
+    feat_cols[1].markdown(
+        """
+        **Temporal aggregation**
+
+        Daily climate or satellite observations are reduced to seasonal summaries so that the
+        machine learning models can work with a single row per state-crop-season example.
+        """
+    )
+
+with story_tabs[4]:
+    st.markdown("### Modeling")
+    st.markdown(
+        """
+        The project compares a set of regression models that range from simple to flexible.
+        The purpose of this comparison is not just to maximize performance but to understand
+        whether nonlinear models add meaningful value beyond a simple baseline.
+
+        The candidate family includes:
+        - mean or dummy baseline,
+        - ridge regression,
+        - random forest,
+        - extra trees,
+        - gradient boosting,
+        - multi-layer perceptron regressor.
+
+        The tuned results stored in the repository show that the tree-based models are the
+        strongest performers. This suggests that the yield problem contains nonlinearities
+        and interactions that simple linear models cannot capture as well.
+        """
+    )
+    if "model" in metrics.columns:
+        model_summary = metrics.copy()
+        cols = [c for c in ["model", "rmse", "mae", "r2", "mape_percent"] if c in model_summary.columns]
+        st.dataframe(model_summary[cols], use_container_width=True)
+    st.markdown(
+        """
+        **Best tuned results from the stored outputs**
+
+        - Random Forest: RMSE 1433.59, MAE 808.71, R2 0.535
+        - Extra Trees: RMSE 1442.53, MAE 831.85, R2 0.529
+        - Gradient Boosting: RMSE 1538.65, MAE 901.20, R2 0.465
+        """
+    )
+
+with story_tabs[5]:
+    st.markdown("### Evaluation")
+    st.markdown(
+        """
+        Evaluation is where we ask whether the model actually generalizes. The project uses
+        several metrics because no single number is enough.
+
+        MAE measures the average absolute error in kg/ha. RMSE penalizes large errors more
+        strongly. R2 measures how much variance is explained relative to a mean baseline.
+        MAPE expresses error as a percentage, though it should be interpreted carefully when
+        yield values are small.
+
+        The project also evaluates residuals by crop, zone, state, and season. This subgroup
+        analysis is important because a model with a strong overall score may still fail badly
+        for one crop or one region.
+        """
+    )
+    if "model" in metrics.columns:
+        leader = metrics.iloc[0]
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Best model", str(leader["model"]))
+        m2.metric("RMSE", f'{leader.get("rmse", float("nan")):,.2f}')
+        m3.metric("MAE", f'{leader.get("mae", float("nan")):,.2f}')
+        m4.metric("R2", f'{leader.get("r2", float("nan")):.3f}')
+    st.caption("The evaluation story is not complete without residual analysis and subgroup checks.")
+
+with story_tabs[6]:
+    st.markdown("### Explainability")
+    st.markdown(
+        """
+        Explainability answers the question: what is the model using to make its predictions?
+        In this project, feature importance, permutation importance, partial dependence, and
+        subgroup residual tables are used to open up the model.
+
+        Explainability is not the same as causality. If a feature is important, that means the
+        model uses it well, not that changing the feature will necessarily change the real-world
+        yield. This is an important distinction in any serious applied machine learning project.
+        """
+    )
+    ex_cols = st.columns(2)
+    ex_cols[0].markdown(
+        """
+        **What the plots can show**
+
+        - which features matter most,
+        - which crops are harder to predict,
+        - where the model underpredicts or overpredicts,
+        - whether climate variables carry meaningful signal.
+        """
+    )
+    ex_cols[1].markdown(
+        """
+        **What they cannot prove**
+
+        - direct causality,
+        - operational intervention effects,
+        - exact field-level conditions,
+        - perfect understanding of every row.
+        """
+    )
+
+with story_tabs[7]:
+    st.markdown("### Figures")
+    st.markdown(
+        """
+        The figures below are the project?s visual evidence. They are not decoration. They are
+        the graphical form of the story told in the textbook.
+        """
+    )
     if image_paths:
-        selected_fig = st.selectbox("Choose a figure", [path.name for path in image_paths])
-        fig_path = REPORTS_FIGURES_DIR / selected_fig
+        figure_names = [path.name for path in image_paths]
+        figure_map = {path.name: path for path in image_paths}
+        selected_fig = st.selectbox("Choose a figure to inspect", figure_names)
+        fig_path = figure_map[selected_fig]
         st.image(Image.open(fig_path), caption=selected_fig, use_container_width=True)
+        st.markdown(
+            f"""
+            **Selected figure:** `{selected_fig}`  
+            Use this figure in the textbook where the corresponding concept is discussed. The
+            dashboard keeps the full set of notebook-generated plots available so that no key
+            result is hidden.
+            """
+        )
     else:
         st.info("No figures were found in `reports/figures/`.")
 
-with story_tabs[4]:
-    st.markdown("### Data explorer")
+with story_tabs[8]:
+    st.markdown("### Explorer")
+    st.markdown(
+        """
+        The explorer lets the reader inspect the modeling dataset directly. This helps connect
+        the high-level story to the actual rows used in training. It is particularly useful for
+        verifying that the dataset is structured as expected and for seeing how features vary.
+        """
+    )
     if not modeling.empty:
         explorer_cols = st.columns([1, 1, 2])
         with explorer_cols[0]:
-            sample_size = st.slider("Rows to preview", 25, min(500, len(modeling)), min(100, len(modeling)))
+            sample_size = st.slider(
+                "Rows to preview",
+                25,
+                min(500, len(modeling)),
+                min(100, len(modeling)),
+            )
         with explorer_cols[1]:
             column_choice = st.selectbox("Highlight column", modeling.columns.tolist())
         with explorer_cols[2]:
@@ -632,8 +851,52 @@ with story_tabs[4]:
     else:
         st.info("Modeling dataset is unavailable.")
 
+with story_tabs[9]:
+    st.markdown("### Limitations")
+    st.markdown(
+        """
+        The project is strong as an educational and exploratory GeoAI study, but it still has
+        real limitations. The data are state-level, not plot-level. The satellite summaries are
+        coarse approximations. Some climate inputs are optional or fallback-based. And the model
+        is predictive rather than causal.
 
+        These limitations do not weaken the project?s value. They define the boundary of what the
+        analysis can honestly claim. A good scientific project is not one that hides its limits,
+        but one that states them clearly.
+        """
+    )
+    st.markdown(
+        """
+        **Main threats to validity**
 
+        - aggregation hides local variation,
+        - seasonal summaries may not align perfectly with crop calendars,
+        - measurement noise may remain in survey tables,
+        - some crops are sparse,
+        - grouped validation is important because random splits can overstate performance.
+        """
+    )
+
+with story_tabs[10]:
+    st.markdown("### Future Work")
+    st.markdown(
+        """
+        The most important future improvement is to move from coarse state-level summaries to
+        plot-level or farm-level geospatial data. That would allow more accurate climate and
+        satellite alignment and would make the analysis much more operational.
+
+        Other strong future directions include:
+        - stronger temporal models,
+        - uncertainty quantification,
+        - more robust spatial validation,
+        - causal inference extensions,
+        - policy-facing risk dashboards.
+
+        These future directions build directly on the current pipeline. The present project is
+        already a complete story, but it is also a foundation for a more advanced research or
+        production-grade system.
+        """
+    )
 
 # ---------------------------------------------------------------------
 
