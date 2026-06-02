@@ -139,6 +139,20 @@ This repo is ready for Streamlit Community Cloud with `streamlit_app.py` at the 
 
 See `.streamlit/config.toml` and `.streamlit/secrets.toml.example` for deployment settings.
 
+## GitHub Pages Website
+
+A static, browser-first website lives in `docs/` and is ready for GitHub Pages.
+
+To publish it:
+
+1. Go to the repository settings on GitHub.
+2. Open **Pages**.
+3. Set the source to **Deploy from a branch**.
+4. Select branch `main` and folder `/docs`.
+5. Save the settings.
+
+The homepage is `docs/index.html`, and the site includes an interactive metrics chart, a filterable prediction scatter plot, and a figure gallery.
+
 ## License
 
 MIT License

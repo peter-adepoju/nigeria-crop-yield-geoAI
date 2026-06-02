@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nigeria Crop Yield GeoAI</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Nigeria Crop Yield GeoAI</p>
+      <h1>Explaining crop yield across Nigerian agroecological zones</h1>
+      <p class="lead">
+        A paper-style project website that tells the full story: problem framing,
+        data audit, geospatial feature engineering, leakage-aware modeling,
+        and model interpretation.
+      </p>
+      <div class="tags">
+        <span>NBS NASS 2022/2023</span>
+        <span>Sentinel-2</span>
+        <span>Climate covariates</span>
+        <span>Random Forest</span>
+        <span>Explainable ML</span>
+      </div>
+    </div>
+    <aside class="hero-card">
+      <div><strong>37</strong><span>states covered</span></div>
+      <div><strong>22</strong><span>crops tracked</span></div>
+      <div><strong>490</strong><span>state-level yield rows</span></div>
+      <div><strong>1,053</strong><span>processed rows</span></div>
+    </aside>
+  </header>
+
+  <nav class="toc">
+    <a href="#abstract">Abstract</a>
+    <a href="#data">Data</a>
+    <a href="#methods">Methods</a>
+    <a href="#results">Results</a>
+    <a href="#explainability">Explainability</a>
+    <a href="#gallery">Gallery</a>
+  </nav>
+
+  <main class="content">
+    <section id="abstract" class="panel">
+      <h2>Abstract</h2>
+      <div class="grid-2">
+        <div>
+          <p>
+            Nigeria’s crop yield varies across geography, rainfall, temperature,
+            seasonality, and crop type. This project asks whether survey tables,
+            climate signals, and remote sensing can be combined to model those
+            differences in a leakage-aware way.
+          </p>
+          <p>
+            The repo includes a reproducible pipeline, notebook walkthrough, model
+            comparison, residual analysis, and a dashboard story designed like a
+            short research paper.
+          </p>
+        </div>
+        <div class="callout">
+          <h3>Research question</h3>
+          <p>Can we explain yield variation across Nigerian states and agroecological zones using survey, climate, and satellite features?</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="data" class="panel">
+      <h2>Data</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>NBS survey tables</h3>
+          <p>State-level crop yield records built from the NASS 2022/2023 workbook.</p>
+        </div>
+        <div class="card">
+          <h3>Climate covariates</h3>
+          <p>Rainfall, temperature, humidity, and heat-stress proxies from climate sources.</p>
+        </div>
+        <div class="card">
+          <h3>Remote sensing</h3>
+          <p>Sentinel-2 vegetation indices such as NDVI, EVI, NDWI, and SAVI.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="methods" class="panel">
+      <h2>Methods</h2>
+      <div class="steps">
+        <div class="step"><span>1</span><p>Audit the source workbook and clean the crop-yield table.</p></div>
+        <div class="step"><span>2</span><p>Build a modeling dataset with leakage control and state metadata.</p></div>
+        <div class="step"><span>3</span><p>Train baseline and tree-based models and compare metrics.</p></div>
+        <div class="step"><span>4</span><p>Inspect residuals by crop, zone, and state.</p></div>
+      </div>
+    </section>
+
+    <section id="results" class="panel">
+      <h2>Results</h2>
+      <div class="grid-2">
+        <div>
+          <div class="results-list" id="metricsList"></div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="metricsChart" height="220"></canvas>
+        </div>
+      </div>
+      <div class="filters">
+        <label>Crop <select id="cropSelect"></select></label>
+        <label>Zone <select id="zoneSelect"></select></label>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="predChart" height="280"></canvas>
+      </div>
+    </section>
+
+    <section id="explainability" class="panel">
+      <h2>Explainability</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>What drives error?</h3>
+          <p>The report includes crop-level bias, zone-level residuals, and feature-importance views.</p>
+        </div>
+        <div class="card">
+          <h3>Best model</h3>
+          <p>Random Forest performed best in the tuned results, with the strongest balance of RMSE, MAE, and R².</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery" class="panel">
+      <h2>Gallery</h2>
+      <p>Selected figures from the analysis notebooks.</p>
+      <div class="gallery">
+        <figure><img src="../reports/figures/tuned_actual_vs_predicted_notebook07.png" alt="Actual vs predicted yield"><figcaption>Actual vs predicted yield</figcaption></figure>
+        <figure><img src="../reports/figures/tuned_model_comparison_notebook07.png" alt="Model comparison"><figcaption>Tuned model comparison</figcaption></figure>
+        <figure><img src="../reports/figures/permutation_importance_notebook08.png" alt="Permutation importance"><figcaption>Permutation importance</figcaption></figure>
+        <figure><img src="../reports/figures/residual_distribution_notebook08.png" alt="Residual distribution"><figcaption>Residual distribution</figcaption></figure>
+      </div>
+    </section>
+  </main>
+
+  <script src="./site.js"></script>
+</body>
+</html>
