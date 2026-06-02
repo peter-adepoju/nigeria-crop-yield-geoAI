@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
+
+
 
 from pathlib import Path
 from typing import Optional
@@ -8,21 +11,39 @@ import streamlit as st
 from PIL import Image
 
 
+
+
 # ---------------------------------------------------------------------
+
 # Project paths
+
 # ---------------------------------------------------------------------
+
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
+
+
 DATA_PROCESSED_DIR = ROOT / "data" / "processed"
+
 REPORTS_TABLES_DIR = ROOT / "reports" / "tables"
+
 REPORTS_FIGURES_DIR = ROOT / "reports" / "figures"
+
 MODELS_DIR = ROOT / "models"
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Streamlit page configuration
+
 # ---------------------------------------------------------------------
+
+
 
 st.set_page_config(
     page_title="Nigeria Crop Yield GeoAI",
@@ -33,6 +54,7 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    html, body, [class*="css"] {font-family: "Segoe UI", "Inter", "Arial", sans-serif;}
     .block-container {padding-top: 1.5rem; padding-bottom: 3rem;}
     .hero {
         background: linear-gradient(135deg, #102a43 0%, #1d4ed8 45%, #0f766e 100%);
@@ -87,6 +109,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 st.markdown(
     """
     <div class="section-card">
@@ -102,212 +125,413 @@ st.markdown(
 )
 
 
-# ---------------------------------------------------------------------
-# Helper functions
+
+
 # ---------------------------------------------------------------------
 
+# Helper functions
+
+# ---------------------------------------------------------------------
+
+
+
 def first_existing_path(paths: list[Path]) -> Optional[Path]:
+
     """
+
     Return the first existing file path from a list of candidate paths.
+
     """
+
     for path in paths:
+
         if path.exists():
+
             return path
+
     return None
+
+
+
 
 
 def load_csv(path: Path, label: str) -> pd.DataFrame:
+
     """
+
     Load a CSV file with a clear Streamlit error message if loading fails.
+
     """
+
     try:
+
         return pd.read_csv(path)
+
     except Exception as exc:
+
         st.error(f"Could not load {label}: `{path}`")
+
         st.exception(exc)
+
         st.stop()
 
 
+
+
+
 def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
+
     """
+
     Normalize column names to make the dashboard more robust.
 
+
+
     This does not change the meaning of columns. It only makes names easier
+
     to work with by removing spaces and making them lowercase.
+
     """
+
     df = df.copy()
+
     df.columns = (
+
         df.columns
+
         .str.strip()
+
         .str.lower()
+
         .str.replace(" ", "_", regex=False)
+
         .str.replace("-", "_", regex=False)
+
     )
+
     return df
 
 
+
+
+
 def find_column(df: pd.DataFrame, candidates: list[str]) -> Optional[str]:
+
     """
+
     Find the first matching column in a dataframe from a list of candidates.
+
     """
+
     for col in candidates:
+
         if col in df.columns:
+
             return col
+
     return None
 
 
+
+
+
 def show_file_status(label: str, path: Optional[Path]) -> None:
+
     """
+
     Display whether a required or optional file was found.
+
     """
+
     if path is None:
+
         st.error(f"{label}: not found")
+
     else:
+
         st.success(f"{label}: found")
+
         st.code(str(path.relative_to(ROOT)))
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Candidate result files
+
 # ---------------------------------------------------------------------
+
+
 
 metrics_candidates = [
+
     REPORTS_TABLES_DIR / "tuned_model_metrics_notebook07.csv",
+
     REPORTS_TABLES_DIR / "model_metrics_notebook06.csv",
+
     REPORTS_TABLES_DIR / "model_metrics.csv",
+
 ]
+
+
 
 predictions_candidates = [
+
     REPORTS_TABLES_DIR / "tuned_model_predictions_notebook07.csv",
+
     REPORTS_TABLES_DIR / "model_predictions_notebook06.csv",
+
     REPORTS_TABLES_DIR / "model_predictions.csv",
+
 ]
+
+
 
 modeling_candidates = [
+
     DATA_PROCESSED_DIR / "modeling_dataset.csv",
+
     DATA_PROCESSED_DIR / "modeling_dataset_notebook05.csv",
+
 ]
 
+
+
 metrics_path = first_existing_path(metrics_candidates)
+
 preds_path = first_existing_path(predictions_candidates)
+
 modeling_path = first_existing_path(modeling_candidates)
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Sidebar
+
 # ---------------------------------------------------------------------
+
+
 
 st.sidebar.title("Project dashboard")
 st.sidebar.caption("Interact with the report like a guided notebook.")
 
+
 st.sidebar.markdown("### Detected files")
 
+
+
 if metrics_path is not None:
+
     st.sidebar.success(f"Metrics: {metrics_path.name}")
+
 else:
+
     st.sidebar.error("Metrics: not found")
 
+
+
 if preds_path is not None:
+
     st.sidebar.success(f"Predictions: {preds_path.name}")
+
 else:
+
     st.sidebar.error("Predictions: not found")
 
+
+
 if modeling_path is not None:
+
     st.sidebar.success(f"Modeling data: {modeling_path.name}")
+
 else:
+
     st.sidebar.warning("Modeling data: not found")
 
+
+
 st.sidebar.markdown("---")
+
+
 
 show_debug = st.sidebar.checkbox("Show debug information", value=False)
 
 image_paths = sorted(REPORTS_FIGURES_DIR.glob("*.png"))
-figure_map = {path.stem: path for path in image_paths}
+
+
 
 
 # ---------------------------------------------------------------------
+
 # Required file check
+
 # ---------------------------------------------------------------------
+
+
 
 if metrics_path is None or preds_path is None:
+
     st.warning(
+
         "The dashboard cannot run yet because the required model output files "
+
         "were not found using the expected filenames."
+
     )
+
+
 
     st.markdown("### Expected metrics files")
 
+
+
     for path in metrics_candidates:
+
         status = "FOUND" if path.exists() else "missing"
+
         st.code(f"{status}: {path.relative_to(ROOT)}")
+
+
 
     st.markdown("### Expected prediction files")
 
+
+
     for path in predictions_candidates:
+
         status = "FOUND" if path.exists() else "missing"
+
         st.code(f"{status}: {path.relative_to(ROOT)}")
 
+
+
     st.markdown(
+
         """
+
         To fix this, run the modeling notebooks first, especially:
 
+
+
         1. `06_baseline_and_machine_learning_models.ipynb`
+
         2. `07_hyperparameter_tuning_and_model_selection.ipynb`
 
+
+
         Alternatively, rename or copy your result files to one of the expected names.
+
         For example, from the VS Code terminal:
 
+
+
         ```powershell
+
         Copy-Item "reports\\tables\\tuned_model_metrics_notebook07.csv" "reports\\tables\\model_metrics.csv" -Force
+
         Copy-Item "reports\\tables\\tuned_model_predictions_notebook07.csv" "reports\\tables\\model_predictions.csv" -Force
+
         ```
+
         """
+
     )
+
+
 
     st.stop()
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Load data
+
 # ---------------------------------------------------------------------
+
+
 
 metrics = load_csv(metrics_path, "model metrics")
+
 preds = load_csv(preds_path, "model predictions")
 
+
+
 metrics = normalize_column_names(metrics)
+
 preds = normalize_column_names(preds)
 
+
+
 if modeling_path is not None:
+
     modeling = load_csv(modeling_path, "modeling dataset")
+
     modeling = normalize_column_names(modeling)
+
 else:
+
     modeling = pd.DataFrame()
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Debug information
+
 # ---------------------------------------------------------------------
+
+
 
 if show_debug:
     st.subheader("Debug information")
 
+
+
     st.markdown("#### Project root")
+
     st.code(str(ROOT))
 
+
+
     st.markdown("#### Files being used")
+
     st.code(f"Metrics: {metrics_path.relative_to(ROOT)}")
+
     st.code(f"Predictions: {preds_path.relative_to(ROOT)}")
 
+
+
     if modeling_path is not None:
+
         st.code(f"Modeling dataset: {modeling_path.relative_to(ROOT)}")
+
     else:
+
         st.code("Modeling dataset: not found")
 
+
+
     st.markdown("#### Metrics columns")
+
     st.write(metrics.columns.tolist())
 
+
+
     st.markdown("#### Predictions columns")
+
     st.write(preds.columns.tolist())
+
+
 
     if not modeling.empty:
         st.markdown("#### Modeling dataset columns")
@@ -322,7 +546,7 @@ with story_tabs[0]:
     with left:
         st.markdown(
             """
-            This project predicts crop yield at the state × crop × season level in Nigeria
+            This project predicts crop yield at the state x crop x season level in Nigeria
             by joining NBS agricultural survey tables with geospatial and climate covariates.
             The core value is not just the prediction itself, but the full pipeline: data audit,
             feature construction, leakage control, model selection, and explainability.
@@ -404,387 +628,771 @@ with story_tabs[4]:
             st.caption("Quick glance at the feature table used for training.")
         st.dataframe(modeling.head(sample_size), use_container_width=True)
         if pd.api.types.is_numeric_dtype(modeling[column_choice]):
-            st.bar_chart(modeling[column_choice].dropna().head(30))
+            st.bar_chart(modeling[column_choice].dropna().head(30), use_container_width=True)
     else:
         st.info("Modeling dataset is unavailable.")
 
 
+
+
 # ---------------------------------------------------------------------
+
 # Validate key columns
+
 # ---------------------------------------------------------------------
+
+
 
 model_col = find_column(metrics, ["model", "model_name", "estimator"])
+
 pred_model_col = find_column(preds, ["model", "model_name", "estimator"])
 
+
+
 if model_col is None:
+
     st.error(
+
         "The metrics file must contain a model column. Expected one of: "
+
         "`model`, `model_name`, or `estimator`."
+
     )
+
     st.stop()
+
+
 
 if pred_model_col is None:
+
     st.error(
+
         "The predictions file must contain a model column. Expected one of: "
+
         "`model`, `model_name`, or `estimator`."
+
     )
+
     st.stop()
+
+
 
 if metrics.empty:
+
     st.error("The metrics file is empty. Re-run the modeling notebook.")
+
     st.stop()
+
+
 
 if preds.empty:
+
     st.error("The predictions file is empty. Re-run the prediction notebook.")
+
     st.stop()
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Model leaderboard
+
 # ---------------------------------------------------------------------
+
+
 
 st.subheader("Model leaderboard")
 
+
+
 st.markdown(
+
     """
+
     The table below compares the trained models using the evaluation metrics
+
     saved from the project notebooks.
+
     """
+
 )
+
+
 
 st.dataframe(metrics, use_container_width=True)
 
+
+
 available_models = metrics[model_col].dropna().astype(str).tolist()
+
+
 
 default_model = available_models[0]
 
+
+
 selected_model = st.selectbox(
+
     "Select model to inspect",
+
     available_models,
+
     index=0,
+
 )
+
+
 
 view = preds[preds[pred_model_col].astype(str) == selected_model].copy()
 
+
+
 if view.empty:
+
     st.warning(f"No prediction rows were found for model: `{selected_model}`")
+
     st.stop()
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Filters
+
 # ---------------------------------------------------------------------
+
+
 
 st.subheader(f"Predictions from model: {selected_model}")
 
+
+
 crop_col = find_column(view, ["crop", "commodity", "crop_name"])
+
 zone_col = find_column(
+
     view,
+
     [
+
         "zone",
+
         "agroecological_zone",
+
         "agro_ecological_zone",
+
         "geopolitical_zone",
+
     ],
+
 )
+
 state_col = find_column(view, ["state", "state_name"])
+
 season_col = find_column(view, ["season", "production_season"])
+
+
 
 filter_cols = st.columns(4)
 
+
+
 with filter_cols[0]:
+
     if crop_col is not None:
+
         crop_options = ["All"] + sorted(view[crop_col].dropna().astype(str).unique())
+
         selected_crop = st.selectbox("Crop", crop_options)
 
+
+
         if selected_crop != "All":
+
             view = view[view[crop_col].astype(str) == selected_crop]
 
+
+
 with filter_cols[1]:
+
     if zone_col is not None:
+
         zone_options = ["All"] + sorted(view[zone_col].dropna().astype(str).unique())
+
         selected_zone = st.selectbox("Zone", zone_options)
 
+
+
         if selected_zone != "All":
+
             view = view[view[zone_col].astype(str) == selected_zone]
 
+
+
 with filter_cols[2]:
+
     if state_col is not None:
+
         state_options = ["All"] + sorted(view[state_col].dropna().astype(str).unique())
+
         selected_state = st.selectbox("State", state_options)
 
+
+
         if selected_state != "All":
+
             view = view[view[state_col].astype(str) == selected_state]
 
+
+
 with filter_cols[3]:
+
     if season_col is not None:
+
         season_options = ["All"] + sorted(view[season_col].dropna().astype(str).unique())
+
         selected_season = st.selectbox("Season", season_options)
 
+
+
         if selected_season != "All":
+
             view = view[view[season_col].astype(str) == selected_season]
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Key columns for plots
+
 # ---------------------------------------------------------------------
+
+
 
 actual_col = find_column(
+
     view,
+
     [
+
         "yield_kg_ha",
+
         "actual",
+
         "actual_yield",
+
         "y_true",
+
         "target",
+
     ],
+
 )
+
+
 
 prediction_col = find_column(
+
     view,
+
     [
+
         "prediction",
+
         "predicted",
+
         "predicted_yield",
+
         "y_pred",
+
     ],
+
 )
+
+
 
 residual_col = find_column(
+
     view,
+
     [
+
         "residual",
+
         "error",
+
         "prediction_error",
+
     ],
+
 )
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Summary cards
+
 # ---------------------------------------------------------------------
+
+
 
 st.subheader("Prediction summary")
 
+
+
 summary_cols = st.columns(4)
 
+
+
 with summary_cols[0]:
+
     st.metric("Rows displayed", f"{len(view):,}")
 
+
+
 with summary_cols[1]:
+
     if actual_col is not None:
+
         st.metric("Mean actual yield", f"{view[actual_col].mean():,.2f}")
+
     else:
+
         st.metric("Mean actual yield", "N/A")
 
+
+
 with summary_cols[2]:
+
     if prediction_col is not None:
+
         st.metric("Mean predicted yield", f"{view[prediction_col].mean():,.2f}")
+
     else:
+
         st.metric("Mean predicted yield", "N/A")
 
+
+
 with summary_cols[3]:
+
     if residual_col is not None:
+
         st.metric("Mean absolute residual", f"{view[residual_col].abs().mean():,.2f}")
+
     elif actual_col is not None and prediction_col is not None:
+
         temp_residual = view[prediction_col] - view[actual_col]
+
         st.metric("Mean absolute residual", f"{temp_residual.abs().mean():,.2f}")
+
     else:
+
         st.metric("Mean absolute residual", "N/A")
 
 
-# ---------------------------------------------------------------------
-# Actual vs predicted plot
+
+
+
 # ---------------------------------------------------------------------
 
+# Actual vs predicted plot
+
+# ---------------------------------------------------------------------
+
+
+
 if actual_col is not None and prediction_col is not None:
+
     st.subheader("Actual vs predicted yield")
+
+
 
     plot_data = view.copy()
 
+
+
     if zone_col is not None:
+
         st.scatter_chart(
+
             plot_data,
+
             x=actual_col,
+
             y=prediction_col,
+
             color=zone_col,
+
             use_container_width=True,
+
         )
+
     else:
+
         st.scatter_chart(
+
             plot_data,
+
             x=actual_col,
+
             y=prediction_col,
+
             use_container_width=True,
+
         )
+
 else:
+
     st.warning(
+
         """
+
         Could not create the actual-vs-predicted scatter plot because the
+
         required actual and prediction columns were not found.
 
+
+
         Expected actual column names include:
+
         `yield_kg_ha`, `actual`, `actual_yield`, `y_true`, `target`.
 
+
+
         Expected prediction column names include:
+
         `prediction`, `predicted`, `predicted_yield`, `y_pred`.
+
         """
+
     )
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Residual/error table
+
 # ---------------------------------------------------------------------
+
+
 
 st.subheader("Prediction error table")
 
+
+
 error_view = view.copy()
 
+
+
 if residual_col is None and actual_col is not None and prediction_col is not None:
+
     error_view["residual"] = error_view[prediction_col] - error_view[actual_col]
+
     residual_col = "residual"
 
+
+
 if residual_col is not None:
+
     error_view = error_view.sort_values(
+
         residual_col,
+
         key=lambda x: x.abs(),
+
         ascending=False,
+
     )
+
+
 
 st.dataframe(error_view, use_container_width=True)
 
 
-# ---------------------------------------------------------------------
-# Grouped error analysis
+
+
+
 # ---------------------------------------------------------------------
 
+# Grouped error analysis
+
+# ---------------------------------------------------------------------
+
+
+
 if residual_col is not None:
+
     st.subheader("Grouped error analysis")
+
+
 
     group_tabs = st.tabs(["By crop", "By zone", "By state", "By season"])
 
+
+
     with group_tabs[0]:
+
         if crop_col is not None:
+
             crop_error = (
+
                 error_view
+
                 .groupby(crop_col, as_index=False)
+
                 .agg(
+
                     n_rows=(residual_col, "size"),
+
                     mean_residual=(residual_col, "mean"),
+
                     mean_abs_residual=(residual_col, lambda x: x.abs().mean()),
+
                 )
+
                 .sort_values("mean_abs_residual", ascending=False)
+
             )
+
             st.dataframe(crop_error, use_container_width=True)
+
         else:
+
             st.info("No crop column found.")
 
+
+
     with group_tabs[1]:
+
         if zone_col is not None:
+
             zone_error = (
+
                 error_view
+
                 .groupby(zone_col, as_index=False)
+
                 .agg(
+
                     n_rows=(residual_col, "size"),
+
                     mean_residual=(residual_col, "mean"),
+
                     mean_abs_residual=(residual_col, lambda x: x.abs().mean()),
+
                 )
+
                 .sort_values("mean_abs_residual", ascending=False)
+
             )
+
             st.dataframe(zone_error, use_container_width=True)
+
         else:
+
             st.info("No zone column found.")
 
+
+
     with group_tabs[2]:
+
         if state_col is not None:
+
             state_error = (
+
                 error_view
+
                 .groupby(state_col, as_index=False)
+
                 .agg(
+
                     n_rows=(residual_col, "size"),
+
                     mean_residual=(residual_col, "mean"),
+
                     mean_abs_residual=(residual_col, lambda x: x.abs().mean()),
+
                 )
+
                 .sort_values("mean_abs_residual", ascending=False)
+
             )
+
             st.dataframe(state_error, use_container_width=True)
+
         else:
+
             st.info("No state column found.")
 
+
+
     with group_tabs[3]:
+
         if season_col is not None:
+
             season_error = (
+
                 error_view
+
                 .groupby(season_col, as_index=False)
+
                 .agg(
+
                     n_rows=(residual_col, "size"),
+
                     mean_residual=(residual_col, "mean"),
+
                     mean_abs_residual=(residual_col, lambda x: x.abs().mean()),
+
                 )
+
                 .sort_values("mean_abs_residual", ascending=False)
+
             )
+
             st.dataframe(season_error, use_container_width=True)
+
         else:
+
             st.info("No season column found.")
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Modeling dataset sample
+
 # ---------------------------------------------------------------------
+
+
 
 if not modeling.empty:
+
     st.subheader("Modeling dataset sample")
 
+
+
     st.markdown(
+
         """
+
         This is a sample of the final machine-learning table used for training
+
         and evaluation.
+
         """
+
     )
+
+
 
     n_rows = st.slider(
+
         "Number of modeling rows to display",
+
         min_value=10,
+
         max_value=min(500, len(modeling)),
+
         value=min(100, len(modeling)),
+
         step=10,
+
     )
+
+
 
     st.dataframe(modeling.head(n_rows), use_container_width=True)
+
 else:
+
     st.info(
+
         "`data/processed/modeling_dataset.csv` was not found, so the modeling "
+
         "dataset sample is not displayed."
+
     )
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Available report tables
+
 # ---------------------------------------------------------------------
+
+
 
 st.subheader("Available report tables")
 
+
+
 table_files = sorted(REPORTS_TABLES_DIR.glob("*.csv"))
 
+
+
 if table_files:
+
     table_names = [path.name for path in table_files]
+
     selected_table_name = st.selectbox("Select a table to preview", table_names)
 
+
+
     selected_table_path = REPORTS_TABLES_DIR / selected_table_name
+
     selected_table = load_csv(selected_table_path, selected_table_name)
 
+
+
     st.dataframe(selected_table, use_container_width=True)
+
 else:
+
     st.info("No CSV tables were found in `reports/tables/`.")
 
 
+
+
+
 # ---------------------------------------------------------------------
+
 # Footer
+
 # ---------------------------------------------------------------------
+
+
 
 st.markdown("---")
 
+
+
 st.caption(
+
     "Nigeria Crop Yield GeoAI dashboard. "
+
     "Run the notebooks in order to regenerate datasets, metrics, predictions, and reports."
+
 )
+
+
+
+
