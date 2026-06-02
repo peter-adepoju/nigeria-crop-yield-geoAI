@@ -1,7 +1,7 @@
 const metrics = [
-  { model: "Random Forest", rmse: 1433.59, mae: 808.71, r2: 0.535 },
-  { model: "Extra Trees", rmse: 1442.53, mae: 831.85, r2: 0.529 },
-  { model: "Gradient Boosting", rmse: 1538.65, mae: 901.20, r2: 0.465 },
+  { model: "Random Forest", rmse: 1433.59, mae: 808.71, r2: 0.535, note: "Best balance of error and stability" },
+  { model: "Extra Trees", rmse: 1442.53, mae: 831.85, r2: 0.529, note: "Very close to the best model" },
+  { model: "Gradient Boosting", rmse: 1538.65, mae: 901.20, r2: 0.465, note: "Weaker but still competitive" },
 ];
 
 const predictions = [
@@ -19,11 +19,11 @@ const metricList = document.getElementById("metricsList");
 metrics.forEach((m) => {
   const el = document.createElement("div");
   el.className = "result";
-  el.innerHTML = `<strong>${m.model}</strong><span>RMSE ${m.rmse.toFixed(2)} | MAE ${m.mae.toFixed(2)} | R² ${m.r2.toFixed(3)}</span>`;
+  el.innerHTML = `<strong>${m.model}</strong><span>RMSE ${m.rmse.toFixed(2)} | MAE ${m.mae.toFixed(2)} | R2 ${m.r2.toFixed(3)}</span><small>${m.note}</small>`;
   metricList.appendChild(el);
 });
 
-new Chart(document.getElementById("metricsChart"), {
+const metricsChart = new Chart(document.getElementById("metricsChart"), {
   type: "bar",
   data: {
     labels: metrics.map((m) => m.model),
@@ -32,7 +32,14 @@ new Chart(document.getElementById("metricsChart"), {
       { label: "MAE", data: metrics.map((m) => m.mae), backgroundColor: "#22c55e" },
     ],
   },
-  options: { responsive: true, plugins: { legend: { labels: { color: "#e5eefc" } } }, scales: { x: { ticks: { color: "#9db0cf" } }, y: { ticks: { color: "#9db0cf" } } } },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: "#e5eefc" } } },
+    scales: {
+      x: { ticks: { color: "#9db0cf" } },
+      y: { ticks: { color: "#9db0cf" } },
+    },
+  },
 });
 
 const cropSelect = document.getElementById("cropSelect");
@@ -46,13 +53,7 @@ const zones = ["All", ...new Set(predictions.map((d) => d.zone))];
 
 const predChart = new Chart(document.getElementById("predChart"), {
   type: "scatter",
-  data: {
-    datasets: [{
-      label: "Actual vs predicted",
-      data: predictions.map((d) => ({ x: d.actual, y: d.pred })),
-      backgroundColor: "#38bdf8",
-    }],
-  },
+  data: { datasets: [{ label: "Actual vs predicted", data: [], backgroundColor: "#38bdf8" }] },
   options: {
     plugins: { legend: { labels: { color: "#e5eefc" } } },
     scales: {
@@ -72,3 +73,12 @@ function refreshPredChart() {
 
 cropSelect.addEventListener("change", refreshPredChart);
 zoneSelect.addEventListener("change", refreshPredChart);
+refreshPredChart();
+
+const chips = document.querySelectorAll('.chip');
+chips.forEach(chip => chip.addEventListener('click', () => {
+  chips.forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  const focus = chip.dataset.focus;
+  document.documentElement.style.setProperty('--focus', focus);
+}));

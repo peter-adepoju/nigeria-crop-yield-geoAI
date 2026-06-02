@@ -11,11 +11,12 @@
   <header class="hero">
     <div class="hero-copy">
       <p class="eyebrow">Nigeria Crop Yield GeoAI</p>
-      <h1>Explaining crop yield across Nigerian agroecological zones</h1>
+      <h1>A textbook-style interactive story of crop yield prediction across Nigeria</h1>
       <p class="lead">
-        A paper-style project website that tells the full story: problem framing,
-        data audit, geospatial feature engineering, leakage-aware modeling,
-        and model interpretation.
+        This site tells the full project story: why the problem matters, where the data came
+        from, how the features were built, which models were trained, what the best results were,
+        and why the errors matter. The page is intentionally long-form and interactive so that a
+        reader can learn the project step by step.
       </p>
       <div class="tags">
         <span>NBS NASS 2022/2023</span>
@@ -35,11 +36,15 @@
 
   <nav class="toc">
     <a href="#abstract">Abstract</a>
+    <a href="#context">Context</a>
     <a href="#data">Data</a>
+    <a href="#repo">Repository</a>
     <a href="#methods">Methods</a>
     <a href="#results">Results</a>
     <a href="#explainability">Explainability</a>
     <a href="#gallery">Gallery</a>
+    <a href="#limitations">Limitations</a>
+    <a href="#future">Future Work</a>
   </nav>
 
   <main class="content">
@@ -48,100 +53,234 @@
       <div class="grid-2">
         <div>
           <p>
-            Nigeria’s crop yield varies across geography, rainfall, temperature,
-            seasonality, and crop type. This project asks whether survey tables,
-            climate signals, and remote sensing can be combined to model those
-            differences in a leakage-aware way.
+            Nigeria's crop yield varies across geography, rainfall, temperature, seasonality,
+            and crop type. This project asks whether survey tables, climate signals, and remote
+            sensing can be combined to model those differences in a leakage-aware way.
           </p>
           <p>
-            The repo includes a reproducible pipeline, notebook walkthrough, model
-            comparison, residual analysis, and a dashboard story designed like a
-            short research paper.
+            The repository includes a reproducible pipeline, notebook walkthrough, model
+            comparison, residual analysis, and a dashboard story designed like a short research
+            paper.
           </p>
         </div>
         <div class="callout">
           <h3>Research question</h3>
           <p>Can we explain yield variation across Nigerian states and agroecological zones using survey, climate, and satellite features?</p>
+          <p class="muted">Use the chips below to change the summary focus.</p>
+          <div class="reading-strip">
+            <button class="chip active" data-focus="overview">Overview</button>
+            <button class="chip" data-focus="methods">Methods</button>
+            <button class="chip" data-focus="results">Results</button>
+            <button class="chip" data-focus="limitations">Limits</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="context" class="panel">
+      <h2>Why This Project Matters</h2>
+      <div class="grid-2">
+        <div>
+          <p>
+            Crop yield is not just a number. It compresses rainfall timing, heat stress,
+            humidity, vegetation condition, crop choice, and farming practice into a single
+            measurement. In a country as geographically diverse as Nigeria, national averages can
+            hide major regional differences.
+          </p>
+          <p>
+            The project turns that broad agricultural question into a machine learning problem:
+            can we predict yield from survey data and geospatial covariates in a way that is
+            accurate, interpretable, and honest about its limitations?
+          </p>
+        </div>
+        <div class="callout">
+          <h3>What the site teaches</h3>
+          <ul>
+            <li>what the target variable means</li>
+            <li>why leakage control matters</li>
+            <li>how climate and satellite data enter the model</li>
+            <li>why residual analysis matters as much as accuracy</li>
+          </ul>
         </div>
       </div>
     </section>
 
     <section id="data" class="panel">
       <h2>Data</h2>
+      <p>
+        The core source is the NBS National Agricultural Sample Survey 2022/2023 report tables.
+        These tables supply the target yield and the main agricultural context. The processed
+        table in the repository summarizes 1,053 rows, of which 490 are state-level rows with
+        yield values.
+      </p>
       <div class="grid-3">
+        <div class="card"><h3>NBS survey tables</h3><p>State-level crop yield records built from the NASS 2022/2023 workbook.</p></div>
+        <div class="card"><h3>Climate covariates</h3><p>Rainfall, temperature, humidity, and heat-stress proxies from climate sources.</p></div>
+        <div class="card"><h3>Remote sensing</h3><p>Sentinel-2 vegetation indices such as NDVI, EVI, NDWI, and SAVI.</p></div>
+      </div>
+      <details>
+        <summary>What data are included in the repository?</summary>
+        <div class="detail-body">
+          <ul>
+            <li><code>data/raw/nbs/nass_report_tables_2022_2023.xlsx</code></li>
+            <li><code>data/processed/nbs_crop_yield_state_zone_2022_2023.csv</code></li>
+            <li><code>data/processed/state_metadata.csv</code></li>
+            <li><code>data/processed/modeling_dataset.csv</code></li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>What data are optional?</summary>
+        <div class="detail-body">
+          <ul>
+            <li>NiMet station climate data</li>
+            <li>NASA POWER fallback climate data</li>
+            <li>Sentinel-2 extraction outputs</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section id="repo" class="panel">
+      <h2>Repository Structure</h2>
+      <div class="grid-2">
         <div class="card">
-          <h3>NBS survey tables</h3>
-          <p>State-level crop yield records built from the NASS 2022/2023 workbook.</p>
+          <h3>Why the structure matters</h3>
+          <p>
+            The repository separates raw data, processed data, scripts, notebooks, reports, and
+            reusable Python code. That organization is part of the scientific method because it
+            makes the pipeline reproducible and auditable.
+          </p>
         </div>
         <div class="card">
-          <h3>Climate covariates</h3>
-          <p>Rainfall, temperature, humidity, and heat-stress proxies from climate sources.</p>
-        </div>
-        <div class="card">
-          <h3>Remote sensing</h3>
-          <p>Sentinel-2 vegetation indices such as NDVI, EVI, NDWI, and SAVI.</p>
+          <h3>How to read the repo</h3>
+          <p>
+            Read notebooks for narrative understanding, scripts for reproducibility, reports for
+            outputs, and the website for the synthesized story. The app and website are not
+            separate distractions; they are communication layers for the same analysis.
+          </p>
         </div>
       </div>
+      <pre class="tree">crop-yield-nigeria-geoai/
+|-- app/
+|-- configs/
+|-- data/
+|-- docs/
+|-- notebooks/
+|-- reports/
+|-- scripts/
+|-- src/nigeria_crop_yield/
+|-- tests/
+`-- streamlit_app.py</pre>
     </section>
 
     <section id="methods" class="panel">
       <h2>Methods</h2>
+      <p>
+        The project follows a familiar data science sequence: audit the data, engineer features,
+        control leakage, train multiple models, evaluate them on held-out data, and inspect the
+        errors.
+      </p>
       <div class="steps">
         <div class="step"><span>1</span><p>Audit the source workbook and clean the crop-yield table.</p></div>
         <div class="step"><span>2</span><p>Build a modeling dataset with leakage control and state metadata.</p></div>
         <div class="step"><span>3</span><p>Train baseline and tree-based models and compare metrics.</p></div>
-        <div class="step"><span>4</span><p>Inspect residuals by crop, zone, and state.</p></div>
+        <div class="step"><span>4</span><p>Inspect residuals by crop, zone, state, and season.</p></div>
       </div>
+      <details open>
+        <summary>How feature engineering works</summary>
+        <div class="detail-body">
+          <p>
+            The final modeling table combines survey variables, state metadata, climate summaries,
+            and vegetation indices. Because the model expects a table, time-series climate and
+            satellite information is condensed into seasonal summaries. This is a practical
+            compromise between realism and usability.
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>Why leakage control matters</summary>
+        <div class="detail-body">
+          <p>
+            If harvested area or production is used directly as a predictor of yield, the model
+            can appear much better than it really is. The project removes those leakage-prone
+            fields so the predictions reflect genuine learned structure rather than target
+            reconstruction.
+          </p>
+        </div>
+      </details>
     </section>
 
     <section id="results" class="panel">
       <h2>Results</h2>
+      <p>
+        The tuned results show that tree-based models outperform the baseline and the simpler
+        linear alternatives. This suggests the crop-yield signal is nonlinear and depends on
+        interactions among crop, climate, zone, and state.
+      </p>
       <div class="grid-2">
-        <div>
-          <div class="results-list" id="metricsList"></div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="metricsChart" height="220"></canvas>
-        </div>
+        <div><div class="results-list" id="metricsList"></div></div>
+        <div class="chart-wrap"><canvas id="metricsChart" height="220"></canvas></div>
       </div>
       <div class="filters">
         <label>Crop <select id="cropSelect"></select></label>
         <label>Zone <select id="zoneSelect"></select></label>
       </div>
-      <div class="chart-wrap">
-        <canvas id="predChart" height="280"></canvas>
-      </div>
+      <div class="chart-wrap"><canvas id="predChart" height="280"></canvas></div>
+      <details>
+        <summary>How to read the results</summary>
+        <div class="detail-body">
+          <ul>
+            <li><strong>RMSE</strong> penalizes large mistakes more strongly.</li>
+            <li><strong>MAE</strong> is the average absolute error in kg/ha.</li>
+            <li><strong>R2</strong> measures explained variance relative to a mean baseline.</li>
+            <li><strong>MAPE</strong> expresses error as a percentage and is useful but unstable near zero.</li>
+          </ul>
+        </div>
+      </details>
     </section>
 
     <section id="explainability" class="panel">
       <h2>Explainability</h2>
+      <p>
+        Explainability answers the question: what is the model using to make its predictions?
+        In this project, feature importance, permutation importance, partial dependence, and
+        subgroup residual tables are used to open up the model.
+      </p>
       <div class="grid-2">
-        <div class="card">
-          <h3>What drives error?</h3>
-          <p>The report includes crop-level bias, zone-level residuals, and feature-importance views.</p>
-        </div>
-        <div class="card">
-          <h3>Best model</h3>
-          <p>Random Forest performed best in the tuned results, with the strongest balance of RMSE, MAE, and R².</p>
-        </div>
+        <div class="card"><h3>What drives error?</h3><p>The report includes crop-level bias, zone-level residuals, and feature-importance views.</p></div>
+        <div class="card"><h3>Best model</h3><p>Random Forest performed best in the tuned results, with the strongest balance of RMSE, MAE, and R2.</p></div>
       </div>
+      <details>
+        <summary>Why explanation is not causality</summary>
+        <div class="detail-body">
+          <p>
+            A feature can be important to the model without being the real-world cause of yield
+            change. Importance means predictive utility inside the fitted model, not necessarily
+            an actionable intervention effect.
+          </p>
+        </div>
+      </details>
     </section>
 
     <section id="gallery" class="panel">
       <h2>Gallery</h2>
-      <p>Selected figures from the analysis notebooks.</p>
+      <p>
+        These figures are the visual proof of the story. Each one corresponds to a notebook
+        output and should be included in the textbook where the matching concept is discussed.
+      </p>
       <div class="gallery">
-        <figure><img src="./assets/figures/tuned_actual_vs_predicted_notebook07.png" alt="Actual vs predicted yield"><figcaption>Actual vs predicted yield</figcaption></figure>
-        <figure><img src="./assets/figures/tuned_model_comparison_notebook07.png" alt="Model comparison"><figcaption>Tuned model comparison</figcaption></figure>
-        <figure><img src="./assets/figures/permutation_importance_notebook08.png" alt="Permutation importance"><figcaption>Permutation importance</figcaption></figure>
-        <figure><img src="./assets/figures/residual_distribution_notebook08.png" alt="Residual distribution"><figcaption>Residual distribution</figcaption></figure>
+        <figure><img src="./assets/figures/tuned_actual_vs_predicted_notebook07.png" alt="Actual vs predicted yield"><figcaption>tuned_actual_vs_predicted_notebook07.png</figcaption></figure>
+        <figure><img src="./assets/figures/tuned_model_comparison_notebook07.png" alt="Model comparison"><figcaption>tuned_model_comparison_notebook07.png</figcaption></figure>
+        <figure><img src="./assets/figures/permutation_importance_notebook08.png" alt="Permutation importance"><figcaption>permutation_importance_notebook08.png</figcaption></figure>
+        <figure><img src="./assets/figures/residual_distribution_notebook08.png" alt="Residual distribution"><figcaption>residual_distribution_notebook08.png</figcaption></figure>
       </div>
     </section>
 
     <section id="visual-story" class="panel">
       <h2>Visual Story</h2>
       <div class="grid-2">
-        <figure><img src="./assets/figures/spatial_residual_centroids_notebook08.png" alt="Spatial residual centroids"><figcaption>Where the model over- and under-predicts geographically</figcaption></figure>
+        <figure><img src="./assets/figures/spatial_residual_centroids_notebook08.png" alt="Spatial residual centroids"><figcaption>spatial_residual_centroids_notebook08.png</figcaption></figure>
         <div class="card">
           <h3>How to read the story</h3>
           <p>
@@ -154,6 +293,42 @@
             published site so they load directly in the browser.
           </p>
         </div>
+      </div>
+    </section>
+
+    <section id="limitations" class="panel">
+      <h2>Limitations</h2>
+      <p>
+        The project is strong as an educational and exploratory GeoAI study, but it still has
+        real limitations. The data are state-level, not plot-level. The satellite summaries are
+        coarse approximations. Some climate inputs are optional or fallback-based. And the model
+        is predictive rather than causal.
+      </p>
+      <details>
+        <summary>Main threats to validity</summary>
+        <div class="detail-body">
+          <ul>
+            <li>Aggregation hides local variation.</li>
+            <li>Seasonal summaries may not align perfectly with crop calendars.</li>
+            <li>Measurement noise may remain in survey tables.</li>
+            <li>Some crops are sparse.</li>
+            <li>Random splits can overstate performance if grouping is ignored.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section id="future" class="panel">
+      <h2>Future Work</h2>
+      <p>
+        The strongest future direction is to move from coarse state-level summaries to plot-level
+        geospatial data. That would allow better climate alignment, better remote sensing,
+        stronger validation, and more actionable policy support.
+      </p>
+      <div class="grid-3">
+        <div class="card"><h3>Better spatial data</h3><p>Use plot or farm coordinates instead of centroids.</p></div>
+        <div class="card"><h3>Uncertainty</h3><p>Predict intervals, not only point estimates.</p></div>
+        <div class="card"><h3>Policy tools</h3><p>Build risk maps and crop-specific decision support.</p></div>
       </div>
     </section>
   </main>
